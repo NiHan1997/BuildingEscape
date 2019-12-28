@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Engine/TriggerVolume.h"
 #include "DoorOpen.generated.h"
 
 
@@ -24,5 +25,25 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+private:
+	/// 开门逻辑.
+	void OpenDoor();
+
+	/// 关门逻辑.
+	void CloseDoor();
+
+private:
+	/// 开门的角度.
+	UPROPERTY(EditAnywhere)
+	float OpenAngle = -70.0f;
+
+	/// 开门的触发器.
+	UPROPERTY(EditAnywhere)
+	ATriggerVolume* OpenDoorTrigger = nullptr;
+
+	/// 开门需要触发的角色.
+	AActor* OpenDoorActor = nullptr;
+
+	/// 当前是否已经开门.
+	bool IsDoorOpen = false;
 };
