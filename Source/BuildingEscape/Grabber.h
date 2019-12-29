@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/InputComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Grabber.generated.h"
 
 
@@ -24,5 +26,17 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+private:
+	/// 搬运物体.
+	void Grab();
+
+	/// 放下物体.
+	void Release();
+
+private:
+	/// 搬运物体工具组件.
+	UPhysicsHandleComponent* PhysicsHandle = nullptr;
+
+	/// 鼠标键盘按键检测组件.
+	UInputComponent* InputComponent = nullptr;
 };

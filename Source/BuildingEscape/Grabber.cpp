@@ -25,8 +25,31 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	// 获取搬运物体的工具组件.
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandle != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UPhysicsHandleComponent 组件成功获取"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s 缺少 UPhysicsHandleComponent 组件"), *GetOwner()->GetName());
+	}
+
+	// 按键检测组件获取.
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (InputComponent != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("InputComponent 组件成功获取"));
+
+		// 绑定按键事件.
+		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s 缺少 InputComponent 组件"), *GetOwner()->GetName());
+	}
 }
 
 
@@ -45,8 +68,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	// 绘制测试射线.
 	FVector lineTraceEnd = playerLocation + playerRotation.Vector() * 1000;
-	DrawDebugLine(GetWorld(), playerLocation, lineTraceEnd,
-		FColor::Red, false, 0.0f, 0, 5.0f);
+	/*DrawDebugLine(GetWorld(), playerLocation, lineTraceEnd,
+		FColor::Red, false, 0.0f, 0, 5.0f);*/
 
 	// 射线检测碰撞逻辑.
 	FHitResult hitResult;
@@ -56,4 +79,14 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	if (hitResult.Actor != nullptr)
 		UE_LOG(LogTemp, Warning, TEXT("射线碰撞到的物体是: %s"), *hitResult.Actor->GetName());
+}
+
+void UGrabber::Grab()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab 方法执行!"));
+}
+
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Release 方法执行!"));
 }
