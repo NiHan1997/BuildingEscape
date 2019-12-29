@@ -2,9 +2,10 @@
 
 
 #include "Grabber.h"
-#include "GameFramework/Actor.h"
 #include "Engine/World.h"
+#include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
+#include "DrawDebugHelpers.h"
 
 #define OUT
 
@@ -39,7 +40,20 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	FRotator playerRotation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT playerLocation, OUT playerRotation);
 
-	UE_LOG(LogTemp, Warning, TEXT("当前视口的位置是: %s, 旋转是: %s"),
-		*playerLocation.ToString(), *playerRotation.ToString());
-}
+	/*UE_LOG(LogTemp, Warning, TEXT("当前视口的位置是: %s, 旋转是: %s"),
+		*playerLocation.ToString(), *playerRotation.ToString());*/
 
+	// 绘制测试射线.
+	FVector lineTraceEnd = playerLocation + playerRotation.Vector() * 1000;
+	DrawDebugLine(GetWorld(), playerLocation, lineTraceEnd,
+		FColor::Red, false, 0.0f, 0, 5.0f);
+
+	// 射线检测碰撞逻辑.
+	FHitResult hitResult;
+	GetWorld()->LineTraceSingleByObjectType(OUT hitResult, playerLocation, lineTraceEnd,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),	// 射线检测的碰撞层.
+		FCollisionQueryParams(FName(TEXT("")), false, GetOwner()));			// 射线检测忽略的对象.
+
+	if (hitResult.Actor != nullptr)
+		UE_LOG(LogTemp, Warning, TEXT("射线碰撞到的物体是: %s"), *hitResult.Actor->GetName());
+}

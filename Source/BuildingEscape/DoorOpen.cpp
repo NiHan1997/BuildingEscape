@@ -2,8 +2,8 @@
 
 
 #include "DoorOpen.h"
-#include "GameFramework/Actor.h"
 #include "Engine/World.h"
+#include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
 
 // Sets default values for this component's properties
@@ -53,4 +53,3 @@ void UDoorOpen::CloseDoor()
 		}
 	}
 }
-
