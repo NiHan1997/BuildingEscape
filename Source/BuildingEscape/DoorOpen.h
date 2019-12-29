@@ -1,4 +1,4 @@
-// Light's NiHan in 2019.
+ï»¿// Light's NiHan in 2019.
 
 #pragma once
 
@@ -26,24 +26,27 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	/// ¿ªÃÅÂß¼­.
+	/// å¼€é—¨é€»è¾‘.
 	void OpenDoor();
 
-	/// ¹ØÃÅÂß¼­.
+	/// å…³é—¨é€»è¾‘.
 	void CloseDoor();
 
 private:
-	/// ¿ªÃÅµÄ½Ç¶È.
+	/// å¼€é—¨çš„è§’åº¦.
 	UPROPERTY(EditAnywhere)
 	float OpenAngle = -70.0f;
 
-	/// ¿ªÃÅµÄ´¥·¢Æ÷.
+	/// å¼€é—¨çš„è§¦å‘å™¨.
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume* OpenDoorTrigger = nullptr;
 
-	/// ¿ªÃÅĞèÒª´¥·¢µÄ½ÇÉ«.
+	/// å¼€é—¨éœ€è¦è§¦å‘çš„è§’è‰².
 	AActor* OpenDoorActor = nullptr;
 
-	/// µ±Ç°ÊÇ·ñÒÑ¾­¿ªÃÅ.
-	bool IsDoorOpen = false;
+	/// ä¸Šæ¬¡å¼€é—¨çš„æ—¶é—´.
+	float LastDoorOpenTime = 0.0f;
+
+	UPROPERTY(EditAnywhere)
+	float DoorCloseDelay = 0.5f;
 };

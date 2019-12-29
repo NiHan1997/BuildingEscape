@@ -35,32 +35,22 @@ void UDoorOpen::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 void UDoorOpen::OpenDoor()
 {
-	// 防止开门逻辑反复执行.
-	if (IsDoorOpen)
-		return;
-
 	OpenDoorActor = GetWorld()->GetFirstPlayerController()->GetPawn();
 	if (OpenDoorActor != nullptr && OpenDoorTrigger->IsOverlappingActor(OpenDoorActor))
 	{
-		FRotator rotation(0.0f, OpenAngle, 0.0f);
-		GetOwner()->SetActorRotation(rotation);
-
-		IsDoorOpen = true;
+		GetOwner()->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
+		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 	}
 }
 
 void UDoorOpen::CloseDoor()
 {
-	// 防止关门逻辑反复执行.
-	if (IsDoorOpen == false)
-		return;
-
-	if (OpenDoorActor != nullptr && OpenDoorTrigger->IsOverlappingActor(OpenDoorActor) == false)
+	if (GetWorld()->GetTimeSeconds() - LastDoorOpenTime > DoorCloseDelay)
 	{
-		FRotator rotation(0.0f, 0.0f, 0.0f);
-		GetOwner()->SetActorRotation(rotation);
-
-		IsDoorOpen = false;
+		if (OpenDoorActor != nullptr && OpenDoorTrigger->IsOverlappingActor(OpenDoorActor) == false)
+		{			
+			GetOwner()->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
+		}
 	}
 }
 
