@@ -8,6 +8,12 @@
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Grabber.generated.h"
 
+/// 角色的基本信息结构体.
+struct PlayerTransform
+{
+	FVector PlayerLocation;
+	FRotator PlayerRotation;
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API UGrabber : public UActorComponent
@@ -39,10 +45,16 @@ private:
 	/// 放下物体.
 	void Release();
 
+	/// 获取射线的结尾.
+	FVector GetLineTraceEnd();
+
 	/// 射线检测逻辑.
-	FHitResult PlayerLineTrace() const;
+	FHitResult PlayerLineTrace();
 
 private:
+	/// 角色的位置、旋转信息.
+	PlayerTransform GrabberTransform;
+
 	/// 搬运物体工具组件.
 	UPhysicsHandleComponent* PhysicsHandle = nullptr;
 

@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
 #include "DrawDebugHelpers.h"
+#include "Components/PrimitiveComponent.h"
 
 #define OUT
 
@@ -34,16 +35,17 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (PhysicsHandle->GrabbedComponent != nullptr)
+	{
+		PhysicsHandle->SetTargetLocation(GetLineTraceEnd());
+	}
 }
 
 void UGrabber::FindPhysicsHandleComponent()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle != nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UPhysicsHandleComponent 组件成功获取"));
-	}
-	else
+	if (PhysicsHandle == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s 缺少 UPhysicsHandleComponent 组件"), *GetOwner()->GetName());
 	}
@@ -54,8 +56,6 @@ void UGrabber::SetUpInputComponent()
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InputComponent != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("InputComponent 组件成功获取"));
-
 		// 绑定按键事件.
 		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
 		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
@@ -70,35 +70,54 @@ void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab 方法执行!"));
 
-	FHitResult hitResult = PlayerLineTrace();
-	if (hitResult.Actor != nullptr)
+	FHitResult HitResult = PlayerLineTrace();
+	if (HitResult.Actor != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("射线检测碰撞的物体是: %s"), *hitResult.Actor->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("射线检测碰撞的物体是: %s"), *HitResult.Actor->GetName());
+
+		// 物体搬运逻辑.
+		PhysicsHandle->GrabComponent(HitResult.GetComponent(), NAME_None,
+			HitResult.GetComponent()->GetOwner()->GetActorLocation(), true);
 	}
 }
 
 void UGrabber::Release()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Release 方法执行!"));
+
+	// 物品放下逻辑.
+	if (PhysicsHandle != nullptr)
+	{
+		PhysicsHandle->ReleaseComponent();
+	}
 }
 
-FHitResult UGrabber::PlayerLineTrace() const
-{	
+FVector UGrabber::GetLineTraceEnd()
+{
 	// 获取当前视口的位置和旋转.
-	FVector playerLocation;
-	FRotator playerRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT playerLocation, OUT playerRotation);
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT GrabberTransform.PlayerLocation,
+		OUT GrabberTransform.PlayerRotation);
 
 	// 绘制测试射线.
-	FVector lineTraceEnd = playerLocation + playerRotation.Vector() * 1000;
-	/*DrawDebugLine(GetWorld(), playerLocation, lineTraceEnd,
+	FVector LineTraceEnd = GrabberTransform.PlayerLocation +
+		GrabberTransform.PlayerRotation.Vector() * 100;
+	/*DrawDebugLine(GetWorld(), GrabberTransform.PlayerLocation, LineTraceEnd,
 		FColor::Red, false, 0.0f, 0, 5.0f);*/
 
-		// 射线检测碰撞逻辑.
-	FHitResult hitResult;
-	GetWorld()->LineTraceSingleByObjectType(OUT hitResult, playerLocation, lineTraceEnd,
+	return LineTraceEnd;
+}
+
+FHitResult UGrabber::PlayerLineTrace()
+{
+	// 射线检测碰撞逻辑.
+	FHitResult HitResult;
+	GetWorld()->LineTraceSingleByObjectType(
+		OUT HitResult,
+		GrabberTransform.PlayerLocation,
+		GetLineTraceEnd(),
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),	// 射线检测的碰撞层.
 		FCollisionQueryParams(FName(TEXT("")), false, GetOwner()));			// 射线检测忽略的对象.
 
-	return hitResult;
+	return HitResult;
 }
