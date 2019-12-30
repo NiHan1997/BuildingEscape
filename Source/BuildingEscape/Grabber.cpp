@@ -25,7 +25,19 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 获取搬运物体的工具组件.
+	FindPhysicsHandleComponent();
+	SetUpInputComponent();
+}
+
+
+// Called every frame
+void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UGrabber::FindPhysicsHandleComponent()
+{
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 	if (PhysicsHandle != nullptr)
 	{
@@ -35,8 +47,10 @@ void UGrabber::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s 缺少 UPhysicsHandleComponent 组件"), *GetOwner()->GetName());
 	}
+}
 
-	// 按键检测组件获取.
+void UGrabber::SetUpInputComponent()
+{
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InputComponent != nullptr)
 	{
@@ -52,41 +66,39 @@ void UGrabber::BeginPlay()
 	}
 }
 
-
-// Called every frame
-void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UGrabber::Grab()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	UE_LOG(LogTemp, Warning, TEXT("Grab 方法执行!"));
 
+	FHitResult hitResult = PlayerLineTrace();
+	if (hitResult.Actor != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("射线检测碰撞的物体是: %s"), *hitResult.Actor->GetName());
+	}
+}
+
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Release 方法执行!"));
+}
+
+FHitResult UGrabber::PlayerLineTrace() const
+{	
 	// 获取当前视口的位置和旋转.
 	FVector playerLocation;
 	FRotator playerRotation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT playerLocation, OUT playerRotation);
-
-	/*UE_LOG(LogTemp, Warning, TEXT("当前视口的位置是: %s, 旋转是: %s"),
-		*playerLocation.ToString(), *playerRotation.ToString());*/
 
 	// 绘制测试射线.
 	FVector lineTraceEnd = playerLocation + playerRotation.Vector() * 1000;
 	/*DrawDebugLine(GetWorld(), playerLocation, lineTraceEnd,
 		FColor::Red, false, 0.0f, 0, 5.0f);*/
 
-	// 射线检测碰撞逻辑.
+		// 射线检测碰撞逻辑.
 	FHitResult hitResult;
 	GetWorld()->LineTraceSingleByObjectType(OUT hitResult, playerLocation, lineTraceEnd,
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),	// 射线检测的碰撞层.
 		FCollisionQueryParams(FName(TEXT("")), false, GetOwner()));			// 射线检测忽略的对象.
 
-	if (hitResult.Actor != nullptr)
-		UE_LOG(LogTemp, Warning, TEXT("射线碰撞到的物体是: %s"), *hitResult.Actor->GetName());
-}
-
-void UGrabber::Grab()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Grab 方法执行!"));
-}
-
-void UGrabber::Release()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Release 方法执行!"));
+	return hitResult;
 }

@@ -27,11 +27,20 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	/// 获取搬运物体的工具组件.
+	void FindPhysicsHandleComponent();
+
+	/// 按键检测组件获取并绑定按键检测事件.
+	void SetUpInputComponent();
+
 	/// 搬运物体.
 	void Grab();
 
 	/// 放下物体.
 	void Release();
+
+	/// 射线检测逻辑.
+	FHitResult PlayerLineTrace() const;
 
 private:
 	/// 搬运物体工具组件.
