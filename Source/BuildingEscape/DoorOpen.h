@@ -1,4 +1,4 @@
-﻿// Light's NiHan in 2019.
+// Light's NiHan in 2019.
 
 #pragma once
 
@@ -32,6 +32,9 @@ private:
 	/// 关门逻辑.
 	void CloseDoor();
 
+	/// 获取触发器中所有物体的质量.
+	float GetTotalMassOnTrigger() const;
+
 private:
 	/// 开门的角度.
 	UPROPERTY(EditAnywhere)
@@ -40,13 +43,4 @@ private:
 	/// 开门的触发器.
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume* OpenDoorTrigger = nullptr;
-
-	/// 开门需要触发的角色.
-	AActor* OpenDoorActor = nullptr;
-
-	/// 上次开门的时间.
-	float LastDoorOpenTime = 0.0f;
-
-	UPROPERTY(EditAnywhere)
-	float DoorCloseDelay = 0.5f;
 };

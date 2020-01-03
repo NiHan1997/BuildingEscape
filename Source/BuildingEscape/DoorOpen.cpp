@@ -1,10 +1,13 @@
-﻿// Light's NiHan in 2019.
+// Light's NiHan in 2019.
 
 
 #include "DoorOpen.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
+#include "Components/PrimitiveComponent.h"
+
+#define OUT
 
 // Sets default values for this component's properties
 UDoorOpen::UDoorOpen()
@@ -35,21 +38,32 @@ void UDoorOpen::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 void UDoorOpen::OpenDoor()
 {
-	OpenDoorActor = GetWorld()->GetFirstPlayerController()->GetPawn();
-	if (OpenDoorActor != nullptr && OpenDoorTrigger->IsOverlappingActor(OpenDoorActor))
+	if (GetTotalMassOnTrigger() > 40)
 	{
 		GetOwner()->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
-		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 	}
 }
 
 void UDoorOpen::CloseDoor()
 {
-	if (GetWorld()->GetTimeSeconds() - LastDoorOpenTime > DoorCloseDelay)
+	if (GetTotalMassOnTrigger() <= 40)
 	{
-		if (OpenDoorActor != nullptr && OpenDoorTrigger->IsOverlappingActor(OpenDoorActor) == false)
-		{			
-			GetOwner()->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
-		}
+		GetOwner()->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
 	}
+}
+
+float UDoorOpen::GetTotalMassOnTrigger() const
+{
+	float TotalMass = 0.0f;
+
+	// 获取触发器中所有的物体, 遍历获取质量.
+	TArray<AActor*> OverlappingActores;
+	OpenDoorTrigger->GetOverlappingActors(OUT OverlappingActores);
+
+	for (const auto& Actor : OverlappingActores)
+	{
+		TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+	}
+
+	return TotalMass;
 }
