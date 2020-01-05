@@ -40,7 +40,7 @@ void UDoorOpen::OpenDoor()
 {
 	if (GetTotalMassOnTrigger() > 40)
 	{
-		GetOwner()->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
+		OnOpenRequest.Broadcast();
 	}
 }
 
@@ -48,7 +48,7 @@ void UDoorOpen::CloseDoor()
 {
 	if (GetTotalMassOnTrigger() <= 40)
 	{
-		GetOwner()->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
+		OnCloseRequest.Broadcast();
 	}
 }
 
@@ -58,7 +58,8 @@ float UDoorOpen::GetTotalMassOnTrigger() const
 
 	// 获取触发器中所有的物体, 遍历获取质量.
 	TArray<AActor*> OverlappingActores;
-	OpenDoorTrigger->GetOverlappingActors(OUT OverlappingActores);
+	if (OpenDoorTrigger != nullptr)
+		OpenDoorTrigger->GetOverlappingActors(OUT OverlappingActores);
 
 	for (const auto& Actor : OverlappingActores)
 	{

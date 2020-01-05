@@ -7,6 +7,7 @@
 #include "Engine/TriggerVolume.h"
 #include "DoorOpen.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoorEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API UDoorOpen : public UActorComponent
@@ -35,11 +36,16 @@ private:
 	/// 获取触发器中所有物体的质量.
 	float GetTotalMassOnTrigger() const;
 
-private:
-	/// 开门的角度.
-	UPROPERTY(EditAnywhere)
-	float OpenAngle = -70.0f;
+public:
+	/// 蓝图开门事件.
+	UPROPERTY(BlueprintAssignable)
+	FDoorEvent OnOpenRequest;
 
+	/// 蓝图关门事件.
+	UPROPERTY(BlueprintAssignable)
+	FDoorEvent OnCloseRequest;
+
+private:
 	/// 开门的触发器.
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume* OpenDoorTrigger = nullptr;
